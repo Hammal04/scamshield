@@ -1,4 +1,5 @@
-export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type RiskLevel = 'VERY_LOW' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type MessageCategory = 'scam' | 'promotional' | 'general';
 export type AnalysisType = 'text' | 'image' | 'url';
 
 export interface RedFlag {
@@ -7,9 +8,32 @@ export interface RedFlag {
   explanation: string;
 }
 
+export interface LinkAnalysis {
+  url: string;
+  visited: boolean;
+  original_domain: string | null;
+  final_url: string | null;
+  final_domain: string | null;
+  redirected: boolean;
+  redirect_count: number;
+  domain_changed: boolean;
+  domain_match: boolean | null;
+  website_title: string | null;
+  visible_text: string | null;
+  page_indicators: string[];
+  status: 'likely_safe' | 'suspicious' | 'likely_malicious' | 'unable_to_verify';
+  reason: string;
+  http_status: number | null;
+}
+
 export interface AnalysisResult {
+  category: MessageCategory;
   risk_score: number;
   risk_level: RiskLevel;
+  overview: string;
+  indicators: string[];
+  links: LinkAnalysis[];
+  recommendation: string;
   verdict: string;
   summary: string;
   red_flags: RedFlag[];
@@ -26,6 +50,10 @@ export interface HistoryRecord {
   title: string;
   risk_score: number;
   risk_level: RiskLevel;
+  overview: string;
+  indicators: string[];
+  links: LinkAnalysis[];
+  recommendation: string;
   verdict: string;
   result: AnalysisResult;
 }

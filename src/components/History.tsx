@@ -9,7 +9,8 @@ interface HistoryProps {
 }
 
 const levelColors: Record<string, string> = {
-  LOW: 'text-accent-400 bg-accent-500/10 border-accent-500/30',
+  VERY_LOW: 'text-accent-400 bg-accent-500/10 border-accent-500/30',
+  LOW: 'text-accent-300 bg-accent-500/10 border-accent-500/30',
   MEDIUM: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30',
   HIGH: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
   CRITICAL: 'text-red-400 bg-red-500/10 border-red-500/30',
@@ -50,7 +51,7 @@ export default function History({ onNavigate, onViewResult }: HistoryProps) {
     critical: records.filter((r) => r.risk_level === 'CRITICAL').length,
     high: records.filter((r) => r.risk_level === 'HIGH').length,
     medium: records.filter((r) => r.risk_level === 'MEDIUM').length,
-    low: records.filter((r) => r.risk_level === 'LOW').length,
+    low: records.filter((r) => r.risk_level === 'LOW' || r.risk_level === 'VERY_LOW').length,
   };
 
   if (records.length === 0) {

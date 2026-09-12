@@ -15,13 +15,16 @@ const levelConfig: Record<RiskLevel, {
   icon: typeof Shield;
   label: string;
 }> = {
-  LOW: {
+  VERY_LOW: {
     color: 'text-accent-400',
     bg: 'bg-accent-500/10',
     border: 'border-accent-500/30',
     text: 'text-accent-300',
     icon: ShieldCheck,
-    label: 'LOW RISK',
+    label: 'VERY LOW RISK',
+  },
+  LOW: {
+    color: 'text-accent-400', bg: 'bg-accent-500/10', border: 'border-accent-500/30', text: 'text-accent-300', icon: ShieldCheck, label: 'LOW RISK',
   },
   MEDIUM: {
     color: 'text-yellow-400',

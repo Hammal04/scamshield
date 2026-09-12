@@ -101,9 +101,10 @@ export default function App() {
                         {[
                           { icon: '1', title: 'Paste or upload', desc: 'Add a message, screenshot, or URL' },
                           { icon: '2', title: 'AI analyzes', desc: 'Groq AI identifies red flags and patterns' },
-                          { icon: '3', title: 'Risk engine scores', desc: 'Transparent scoring from weighted indicators' },
-                          { icon: '4', title: 'Understand & act', desc: 'Learn why and what to do next' },
-                        ].map((step) => (
+                          { icon: '3', title: 'Visit & inspect links', desc: 'Safely follow redirects and inspect destination pages' },
+                          { icon: '4', title: 'Risk engine scores', desc: 'Combine message and website evidence' },
+                          { icon: '5', title: 'Understand & act', desc: 'Learn why and what to do next' },
+                                                  ].map((step) => (
                           <li key={step.icon} className="flex items-start gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent-500/15 text-accent-300 text-xs font-bold flex items-center justify-center">
                               {step.icon}
@@ -124,10 +125,11 @@ export default function App() {
                       </div>
                       <div className="space-y-2">
                         {[
-                          { level: 'LOW', color: 'text-accent-400', bg: 'bg-accent-500/10', range: '0–29' },
-                          { level: 'MEDIUM', color: 'text-yellow-400', bg: 'bg-yellow-500/10', range: '30–59' },
-                          { level: 'HIGH', color: 'text-orange-400', bg: 'bg-orange-500/10', range: '60–79' },
-                          { level: 'CRITICAL', color: 'text-red-400', bg: 'bg-red-500/10', range: '80–100' },
+                          { level: 'VERY LOW', color: 'text-accent-400', bg: 'bg-accent-500/10', range: '0–20' },
+                          { level: 'LOW', color: 'text-accent-300', bg: 'bg-accent-500/10', range: '21–40' },
+                          { level: 'MEDIUM', color: 'text-yellow-400', bg: 'bg-yellow-500/10', range: '41–60' },
+                          { level: 'HIGH', color: 'text-orange-400', bg: 'bg-orange-500/10', range: '61–80' },
+                          { level: 'CRITICAL', color: 'text-red-400', bg: 'bg-red-500/10', range: '81–100' },
                         ].map((r) => (
                           <div key={r.level} className={`flex items-center justify-between px-3 py-2 rounded-lg ${r.bg}`}>
                             <span className={`text-sm font-medium ${r.color}`}>{r.level}</span>
