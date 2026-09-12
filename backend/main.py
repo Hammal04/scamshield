@@ -18,6 +18,7 @@ from risk_engine import calculate_risk_score, get_risk_level, assess_url
 from link_inspector import extract_urls, inspect_urls, compare_claimed_brand
 from utils import truncate_preview, image_to_base64_data_url, validate_image_content
 from number_analyzer import analyze_number
+from number_reputation import lookup_number_reputation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -191,7 +192,42 @@ async def analyze_url_endpoint(req: URLRequest):
 @app.post("/analyze/number", response_model=NumberAnalysisResult)
 async def analyze_number_endpoint(req: NumberRequest):
     try:
-        return analyze_number(req.number, req.default_region)
+        result = analyze_number(req.number, req.default_region)
+        reputation = await lookup_number_reputation(result["normalized_number"], result["national_format"], result["country"])
+
+        result["internet_checked"] = bool(reputation.get("searched"))
+        result["internet_status"] = reputation.get("status", "not_configured") if reputation.get("searched") else "not_configured"
+        result["internet_report_count"] = int(reputation.get("report_count", 0))
+        result["internet_evidence_score"] = int(reputation.get("evidence_score", 0))
+        result["internet_message"] = reputation.get("message", "")
+        result["internet_sources"] = reputation.get("sources", [])
+
+        evidence = result["internet_evidence_score"]
+        if evidence >= 70:
+            result["risk_score"] = max(result["risk_score"], 90)
+            result["risk_level"] = "CRITICAL"
+            result["status"] = "likely_malicious"
+            result["verdict"] = "Strong public web evidence indicates that this number has been reported for scam or fraud-related activity. This is a reputation finding, not proof of who currently controls the number."
+            result["recommendation"] = "Do not call back, send money, or share OTPs, passwords, banking details, or personal information. Verify the caller through an official channel."
+            result["indicators"].insert(0, {"title": "Multiple online scam reports found", "severity": "HIGH", "explanation": f"The live internet search found {result['internet_report_count']} strong report result(s) about this exact number."})
+        elif evidence >= 35:
+            result["risk_score"] = max(result["risk_score"], 70)
+            result["risk_level"] = "HIGH"
+            result["status"] = "suspicious"
+            result["verdict"] = "Online sources contain meaningful scam/spam warning evidence for this number, but the evidence is not sufficient to establish that the number is definitively malicious."
+            result["recommendation"] = "Treat the caller as suspicious. Do not share sensitive information or make payments until you independently verify the caller."
+            result["indicators"].insert(0, {"title": "Online scam/spam reports found", "severity": "HIGH", "explanation": f"The live internet search found {result['internet_report_count']} strong report result(s) and an evidence score of {evidence}/100."})
+        elif reputation.get("status") == "weak_reports":
+            result["risk_score"] = max(result["risk_score"], 30)
+            result["risk_level"] = "MEDIUM"
+            result["status"] = "suspicious"
+            result["indicators"].insert(0, {"title": "Weak online warning evidence", "severity": "MEDIUM", "explanation": "Search results mention this number in potentially relevant contexts, but the available evidence is not strong enough to label it a scam."})
+        elif reputation.get("status") == "no_reports_found":
+            result["indicators"].append({"title": "No strong scam reports found", "severity": "LOW", "explanation": "The configured live web search did not find strong public scam-report evidence for this exact number. Absence of reports is not proof of safety."})
+        else:
+            result["indicators"].append({"title": "Internet reputation could not be verified", "severity": "LOW", "explanation": reputation.get("message", "Live web lookup was unavailable.")})
+
+        return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

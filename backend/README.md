@@ -55,3 +55,16 @@ SCAM_NUMBER_BLOCKLIST=+923001234567,+14155550123
 ```
 
 A number that is not on the blocklist is **not** guaranteed safe. Phone numbers can be spoofed, recycled, or newly created, so the UI deliberately describes number-only results as signals rather than proof of fraud.
+
+## Live phone-number internet reputation
+
+The `/analyze/number` endpoint performs a live web reputation lookup. It does **not** rely on the administrator blocklist alone.
+
+Configure one of these providers on the backend/serverless environment:
+
+- `SERPER_API_KEY` (recommended): Google Search results through Serper.
+- `GOOGLE_CSE_API_KEY` + `GOOGLE_CSE_ID`: Google Custom Search JSON API.
+
+The service searches the exact normalized number in several forms with scam/fraud/spam/report queries, deduplicates results, scores evidence, and returns the public source URLs/snippets to the frontend.
+
+A missing search result means **no strong reports were found**, not that the number is safe. Community reports are treated as reputation evidence rather than proof of criminal activity.

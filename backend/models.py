@@ -25,6 +25,15 @@ class NumberIndicator(BaseModel):
     explanation: str
 
 
+class NumberSource(BaseModel):
+    title: str
+    snippet: str = ""
+    url: str
+    domain: str = ""
+    evidence_score: int = 0
+    matched_terms: list[str] = []
+
+
 class NumberAnalysisResult(BaseModel):
     number: str
     normalized_number: str
@@ -41,6 +50,12 @@ class NumberAnalysisResult(BaseModel):
     indicators: list[NumberIndicator] = []
     recommendation: str
     database_match: bool = False
+    internet_checked: bool = False
+    internet_status: Literal["reported_suspicious", "weak_reports", "no_reports_found", "unable_to_verify", "not_configured"] = "not_configured"
+    internet_report_count: int = 0
+    internet_evidence_score: int = 0
+    internet_message: str = ""
+    internet_sources: list[NumberSource] = []
 
 
 class RedFlag(BaseModel):

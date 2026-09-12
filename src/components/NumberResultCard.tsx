@@ -1,4 +1,4 @@
-import { Phone, ShieldAlert, ShieldCheck, RotateCcw, Database, MapPin, Radio } from 'lucide-react';
+import { Phone, ShieldAlert, ShieldCheck, RotateCcw, Database, MapPin, Radio, Globe, ExternalLink } from 'lucide-react';
 import type { NumberAnalysisResult } from '../types';
 import RiskScore from './RiskScore';
 
@@ -35,7 +35,7 @@ export default function NumberResultCard({ result, onReset }: Props) {
 
       <div className="card p-6">
         <h3 className="text-lg font-semibold text-white mb-3">Final Overview</h3>
-        <p className="text-sm text-navy-200 leading-relaxed">{matched ? 'This exact phone number matches the ScamShield scam-number blocklist configured by the administrator.' : 'This check evaluates phone-number intelligence and warning signals. A clean result does not prove that the caller is trustworthy because scammers can spoof or rotate phone numbers.'}</p>
+        <p className="text-sm text-navy-200 leading-relaxed">{result.internet_status === 'reported_suspicious' ? `Public web sources contain scam/spam reports for this exact number. ScamShield uses those reports as reputation evidence, not as proof of who currently controls the number.` : result.internet_status === 'weak_reports' ? 'Public web search found some potentially relevant warnings, but the evidence is limited. Review the sources before deciding how much to trust the caller.' : result.internet_status === 'no_reports_found' ? 'The live web search found no strong public scam reports for this exact number. This does not prove the number is safe; new or unreported scam numbers can have no online history.' : result.internet_status === 'unable_to_verify' ? 'ScamShield could not complete the live internet reputation check. The number should be treated as unverified rather than safe.' : 'Configure a live search provider to check this number against current public internet reports.'}</p>
       </div>
 
       <div className="card p-6">
@@ -44,8 +44,26 @@ export default function NumberResultCard({ result, onReset }: Props) {
       </div>
 
       <div className="card p-6">
-        <div className="flex items-center gap-2 mb-3"><Database className="w-5 h-5 text-accent-400" /><h3 className="text-lg font-semibold text-white">Number Reputation</h3></div>
-        <p className="text-sm text-navy-300">{matched ? 'Exact match found in the configured scam-number blocklist.' : 'No exact match was found in the configured scam-number blocklist.'}</p>
+        <div className="flex items-center gap-2 mb-3"><Globe className="w-5 h-5 text-accent-400" /><h3 className="text-lg font-semibold text-white">Internet Reputation Check</h3></div>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${result.internet_status === 'reported_suspicious' ? 'text-red-300 bg-red-500/10 border-red-500/30' : result.internet_status === 'weak_reports' ? 'text-orange-300 bg-orange-500/10 border-orange-500/30' : result.internet_status === 'no_reports_found' ? 'text-accent-300 bg-accent-500/10 border-accent-500/30' : 'text-navy-300 bg-navy-800 border-navy-700'}`}>
+            {result.internet_status === 'reported_suspicious' ? '🚨 Online reports found' : result.internet_status === 'weak_reports' ? '⚠️ Weak reports found' : result.internet_status === 'no_reports_found' ? 'ℹ️ No strong reports found' : result.internet_status === 'unable_to_verify' ? '❓ Unable to verify' : '⚙️ Internet lookup not configured'}
+          </span>
+          {result.internet_checked && <span className="text-xs text-navy-300 px-2.5 py-1 rounded-full bg-navy-900 border border-navy-700">{result.internet_report_count} strong result(s)</span>}
+        </div>
+        <p className="text-sm text-navy-300 leading-relaxed">{result.internet_message || 'No live internet reputation provider is configured.'}</p>
+        {result.internet_sources.length > 0 && <div className="mt-4 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-navy-400">Public web evidence</p>
+          {result.internet_sources.map((source, i) => <div key={`${source.url}-${i}`} className="rounded-xl bg-navy-900/50 border border-navy-700/50 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div><p className="text-sm font-semibold text-white">{source.title || source.domain}</p><p className="text-xs text-navy-400 mt-0.5">{source.domain}</p></div>
+              <a href={source.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-accent-400 hover:text-accent-300" aria-label="Open source"><ExternalLink className="w-4 h-4" /></a>
+            </div>
+            <p className="text-xs text-navy-300 mt-2 leading-relaxed">{source.snippet}</p>
+            {source.matched_terms.length > 0 && <p className="text-[11px] text-orange-300 mt-2">Signals: {source.matched_terms.join(', ')}</p>}
+          </div>)}
+        </div>}
+        {matched && <div className="mt-4 flex items-center gap-2 text-xs text-red-300"><Database className="w-4 h-4" /> Also matched the optional administrator blocklist.</div>}
       </div>
 
       <div className="card p-6 border-accent-500/20">
