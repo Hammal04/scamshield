@@ -56,3 +56,15 @@ npm run dev
 ## Deployment
 
 The existing architecture remains **Vercel frontend + a FastAPI backend service (Render/Railway)**. Set `VITE_API_URL` on Vercel to the deployed FastAPI URL, and keep `GROQ_API_KEY` only on the backend. Set `CORS_ORIGINS` on the backend to the Vercel origin in production.
+
+### Phone Number Scam Detection
+
+The Analyze screen now has a **Phone Number** tab. Users can enter an international number (recommended) or a local Pakistan number. The backend validates and normalizes the number, checks country/region, carrier and number type, detects limited warning patterns, and can match exact numbers against the administrator's `SCAM_NUMBER_BLOCKLIST`.
+
+For a trusted list of reported scam numbers, configure this **backend-only** environment variable:
+
+```env
+SCAM_NUMBER_BLOCKLIST=+923001234567,+14155550123
+```
+
+A clean number result does not mean the caller is definitely legitimate; caller-ID spoofing and newly used numbers are possible.

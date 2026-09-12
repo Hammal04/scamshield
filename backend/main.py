@@ -12,11 +12,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from PIL import Image
 
-from models import TextRequest, URLRequest, AnalysisResult, HealthResponse, RootResponse, RedFlag, LinkAnalysis
+from models import TextRequest, URLRequest, NumberRequest, NumberAnalysisResult, AnalysisResult, HealthResponse, RootResponse, RedFlag, LinkAnalysis
 from ai_analyzer import analyze_text, analyze_image, analyze_url, is_configured, get_text_model
 from risk_engine import calculate_risk_score, get_risk_level, assess_url
 from link_inspector import extract_urls, inspect_urls, compare_claimed_brand
 from utils import truncate_preview, image_to_base64_data_url, validate_image_content
+from number_analyzer import analyze_number
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -186,3 +187,14 @@ async def analyze_url_endpoint(req: URLRequest):
         raise HTTPException(status_code=502, detail="AI analysis failed. Please try again.")
     ai_data["red_flags"] = (ai_data.get("red_flags") or []) + heuristic_flags
     return _build_result(ai_data, "url", target, [link_result])
+
+@app.post("/analyze/number", response_model=NumberAnalysisResult)
+async def analyze_number_endpoint(req: NumberRequest):
+    try:
+        return analyze_number(req.number, req.default_region)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error("Number analysis failed: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="Phone number analysis failed. Please try again.")
+

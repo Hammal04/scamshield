@@ -1,4 +1,4 @@
-import type { AnalysisResult } from './types';
+import type { AnalysisResult, NumberAnalysisResult } from './types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -53,5 +53,19 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
 export async function checkHealth(): Promise<{ status: string; groq_configured: boolean; model: string }> {
   const res = await fetch(`${API_BASE}/health`);
   if (!res.ok) throw new Error('Backend unavailable');
+  return res.json();
+}
+
+export async function analyzeNumber(number: string, defaultRegion = 'PK'): Promise<NumberAnalysisResult> {
+  const res = await fetch(`${API_BASE}/analyze/number`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ number, default_region: defaultRegion }),
+  });
+  if (!res.ok) {
+    let detail = 'Number analysis failed.';
+    try { detail = (await res.json()).detail || detail; } catch { /* ignore */ }
+    throw new Error(detail);
+  }
   return res.json();
 }

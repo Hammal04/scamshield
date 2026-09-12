@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Shield, ShieldCheck, ShieldAlert, Activity } from 'lucide-react';
-import type { View, AnalysisResult } from './types';
+import type { View, AnalysisResult, NumberAnalysisResult } from './types';
 import Header from './components/Header';
 import Analyzer from './components/Analyzer';
 import ResultCard from './components/ResultCard';
 import History from './components/History';
 import About from './components/About';
 import { checkHealth } from './api';
+import NumberResultCard from './components/NumberResultCard';
 
 export default function App() {
   const [view, setView] = useState<View>('analyze');
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<AnalysisResult | NumberAnalysisResult | null>(null);
   const [backendStatus, setBackendStatus] = useState<'checking' | 'online' | 'offline'>('checking');
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function App() {
       .catch(() => setBackendStatus('offline'));
   }, []);
 
-  const handleResult = (r: AnalysisResult) => {
+  const handleResult = (r: AnalysisResult | NumberAnalysisResult) => {
     setResult(r);
   };
 
@@ -83,7 +84,11 @@ export default function App() {
 
               {/* Result or Analyzer */}
               {result ? (
-                <ResultCard result={result} onReset={handleReset} />
+                'analysis_type' in result && result.analysis_type !== 'number' ? (
+                  <ResultCard result={result} onReset={handleReset} />
+                ) : (
+                  <NumberResultCard result={result as NumberAnalysisResult} onReset={handleReset} />
+                )
               ) : (
                 <div className="grid lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">

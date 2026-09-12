@@ -12,6 +12,37 @@ class URLRequest(BaseModel):
     url: str = Field(..., min_length=1, max_length=2048, description="The suspicious URL to analyze")
 
 
+
+
+class NumberRequest(BaseModel):
+    number: str = Field(..., min_length=3, max_length=40, description="Phone number to analyze")
+    default_region: str = Field(default="PK", min_length=2, max_length=2, description="ISO country/region code for local numbers")
+
+
+class NumberIndicator(BaseModel):
+    title: str
+    severity: Literal["LOW", "MEDIUM", "HIGH"]
+    explanation: str
+
+
+class NumberAnalysisResult(BaseModel):
+    number: str
+    normalized_number: str
+    national_format: str
+    country: str
+    region_code: Optional[str] = None
+    carrier: str
+    number_type: str
+    valid: bool
+    risk_score: int = Field(..., ge=0, le=100)
+    risk_level: Literal["VERY_LOW", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    status: Literal["likely_safe", "suspicious", "likely_malicious"]
+    verdict: str
+    indicators: list[NumberIndicator] = []
+    recommendation: str
+    database_match: bool = False
+
+
 class RedFlag(BaseModel):
     title: str
     severity: str

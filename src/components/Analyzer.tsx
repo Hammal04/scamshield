@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { MessageSquare, Image, Link2, Shield } from 'lucide-react';
-import type { AnalysisTab, AnalysisResult } from '../types';
+import { MessageSquare, Image, Link2, Shield, Phone } from 'lucide-react';
+import type { AnalysisTab, AnalysisResult, NumberAnalysisResult } from '../types';
 import MessageAnalyzer from './MessageAnalyzer';
 import ScreenshotAnalyzer from './ScreenshotAnalyzer';
 import URLAnalyzer from './URLAnalyzer';
+import NumberAnalyzer from './NumberAnalyzer';
 
 interface AnalyzerProps {
-  onResult: (result: AnalysisResult) => void;
+  onResult: (result: AnalysisResult | NumberAnalysisResult) => void;
 }
 
 const tabs: { id: AnalysisTab; label: string; icon: typeof MessageSquare }[] = [
   { id: 'message', label: 'Message', icon: MessageSquare },
   { id: 'screenshot', label: 'Screenshot', icon: Image },
   { id: 'url', label: 'URL', icon: Link2 },
+  { id: 'number', label: 'Phone Number', icon: Phone },
 ];
 
 export default function Analyzer({ onResult }: AnalyzerProps) {
@@ -46,6 +48,7 @@ export default function Analyzer({ onResult }: AnalyzerProps) {
         {activeTab === 'message' && <MessageAnalyzer onResult={onResult} />}
         {activeTab === 'screenshot' && <ScreenshotAnalyzer onResult={onResult} />}
         {activeTab === 'url' && <URLAnalyzer onResult={onResult} />}
+      {activeTab === 'number' && <NumberAnalyzer onResult={(r) => onResult(r)} />}
       </div>
 
       {/* Shield watermark */}

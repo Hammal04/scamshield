@@ -43,3 +43,15 @@ A successful HTTP response, HTTPS, SSL certificate, or professional-looking page
 | `CORS_ORIGINS` | `*` | Comma-separated frontend origins in production |
 | `HOST` | `0.0.0.0` | Server host |
 | `PORT` | `8000` | Server port |
+
+## Scam Number Analyzer
+
+ScamShield now includes `POST /analyze/number` for phone-number checks. It normalizes and validates the number, identifies country/region, carrier and number type, checks unusual patterns, and compares the exact E.164 number against an optional administrator-configured blocklist.
+
+Set `SCAM_NUMBER_BLOCKLIST` in the backend environment as a comma-separated list of E.164 numbers when you have a trusted list of reported scam numbers, for example:
+
+```env
+SCAM_NUMBER_BLOCKLIST=+923001234567,+14155550123
+```
+
+A number that is not on the blocklist is **not** guaranteed safe. Phone numbers can be spoofed, recycled, or newly created, so the UI deliberately describes number-only results as signals rather than proof of fraud.
