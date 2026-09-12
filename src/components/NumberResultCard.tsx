@@ -6,13 +6,28 @@ interface Props { result: NumberAnalysisResult; onReset: () => void; }
 
 export default function NumberResultCard({ result, onReset }: Props) {
   const matched = result.database_match;
+  // Keep the headline badge aligned with the final risk decision. Internet reputation
+  // evidence can raise the risk even when there is no local blocklist match.
+  const strongSignals = matched ||
+    result.risk_score >= 61 ||
+    result.risk_level === 'HIGH' ||
+    result.risk_level === 'CRITICAL' ||
+    result.status === 'likely_malicious' ||
+    result.internet_status === 'reported_suspicious';
+  const badgeLabel = matched
+    ? '🚨 Reported Scam Number'
+    : strongSignals
+      ? '🚨 Strong Signals Detected'
+      : result.internet_status === 'weak_reports'
+        ? '⚠️ Suspicious Signals'
+        : '✅ No Strong Signals';
   return (
     <div className="space-y-4 animate-slide-up">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-navy-400">Phone Number Analysis</span>
-          <span className={`px-3 py-1 rounded-full border text-xs font-bold ${matched ? 'text-red-300 bg-red-500/10 border-red-500/30' : result.status === 'suspicious' ? 'text-orange-300 bg-orange-500/10 border-orange-500/30' : 'text-accent-300 bg-accent-500/10 border-accent-500/30'}`}>
-            {matched ? '🚨 Reported Scam Number' : result.status === 'suspicious' ? '⚠️ Suspicious' : '✅ No Strong Signals'}
+          <span className={`px-3 py-1 rounded-full border text-xs font-bold ${matched || strongSignals ? 'text-red-300 bg-red-500/10 border-red-500/30' : result.internet_status === 'weak_reports' ? 'text-orange-300 bg-orange-500/10 border-orange-500/30' : 'text-accent-300 bg-accent-500/10 border-accent-500/30'}`}>
+            {badgeLabel}
           </span>
         </div>
         <button onClick={onReset} className="flex items-center gap-1.5 text-sm text-navy-300 hover:text-white transition-colors"><RotateCcw className="w-4 h-4" />New Analysis</button>
